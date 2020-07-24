@@ -16,6 +16,7 @@ from Gases.NITROGEN cimport Gas_nitrogen
 from Gases.HYDROGEN cimport Gas_hydrogen
 from Gases.DEUTERIUM cimport Gas_deuterium
 from Gases.DME cimport Gas_DME
+from Gases.DME2 cimport Gas_DME2
 from Gases.XENONMERT cimport Gas_xenonmert
 from libc.string cimport memset
 from PyGasMix.Gas cimport Gas
@@ -57,6 +58,8 @@ cdef void callGASF(Gas*GAS, Params):
         Gas_deuterium(GAS)
     elif GAS.GasNumber == 25:
         Gas_DME(GAS)
+    elif GAS.GasNumber == 26:
+        Gas_DME2(GAS)
     elif GAS.GasNumber == 61:
         Gas_xenonmert(GAS, Params['A'], Params['D'], Params['F'], Params['A1'], Params['Lambda'], Params['EV0'])
 
