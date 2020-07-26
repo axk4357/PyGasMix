@@ -43,7 +43,7 @@ cdef void Gas_DME2(Gas*object):
     YEXC=gd['gas_DME2/YEXC']
     XEXC1=gd['gas_DME2/XEXC1']
     YEXC1=gd['gas_DME2/YEXC1']
-    object.EnergyLevels = gd['gas_DME2/EnergyLevels’]
+    object.EnergyLevels = gd['gas_DME2/EnergyLevels']
     # ---------------------------------------------------------------------
     # UPDATES DME97 WITH MONTE CARLO SIMULATION OF STEADY STATE TOWNSEND
     #  VALUE FOR ALPHA.
