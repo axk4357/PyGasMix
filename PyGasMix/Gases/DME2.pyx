@@ -26,6 +26,7 @@ cdef void Gas_DME2(Gas*object):
 
     cdef int NDATA,NVIB3,NVIB4,NVIB5,NVIB6,N_IonizationD,N_Attachment1,NEXC,NEXC1
     XEN=gd['gas_DME2/XEN']
+    print(XEN)
     YXSEC=gd['gas_DME2/YXSEC']
     XION=gd['gas_DME2/XION']
     YION=gd['gas_DME2/YION']

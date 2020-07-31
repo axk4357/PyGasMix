@@ -47,8 +47,8 @@ cdef void Gas_DME(Gas*object):
     # ---------------------------------------------------------------------
     # UPDATES DME97 WITH MONTE CARLO SIMULATION OF STEADY STATE TOWNSEND
     #  VALUE FOR ALPHA.
-    # UPDATES DME94 WITH CORRECT VIBRATIONAL ANALYSIS FROM SVERDLOV.
-    # UPDATES DME92 WITH BETTER FIT TO FANO AND EV/ION PAIR
+    # UPDATES DM94 WITH CORRECT VIBRATIONAL ANALYSIS FROM SVERDLOV.
+    # UPDATES DM92 WITH BETTER FIT TO FANO AND EV/ION PAIR
     # ---------------------------------------------------------------------
     cdef double AVIB1,AVIB2
     cdef int i,j,I,J
