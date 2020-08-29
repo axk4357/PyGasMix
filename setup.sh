@@ -6,8 +6,12 @@ export PATH=$PATH:$PWD
 echo $PYTHONPATH
 
 # build the code
-python3.8 setup_build.py clean
+python3 setup_build.py clean
 export CFLAGS="-I /usr/local/lib/python3.8/site-packages/numpy/core/include $CFLAGS"
-python3.8 setup_build.py build_ext --inplace
+python3 setup_build.py build_ext --inplace
+
+#build the gas file
+python3 PyGasMix/Gases/Setup_npy.py
+mv gases.npy PyGasMix/Gases
 
 
