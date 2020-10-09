@@ -15,10 +15,10 @@ import os
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.fast_getattr(True)
-
 cdef void Gas_C2F6(Gas*object):
+
     """
-    This function is used to calculate the needed momentum cross sections for C2F4 gas.
+    This function is used to calculate the needed momentum cross sections for C2F6 gas.
     """
     gd = np.load(os.path.join(os.path.dirname(os.path.realpath(__file__)),"gases.npy"),allow_pickle=True).item()
 
@@ -48,14 +48,15 @@ cdef void Gas_C2F6(Gas*object):
     object.EnergyLevels = gd['gas_C2F6/EnergyLevels']
 
 #———————————————————————————————————————
-    cdef double AVIB1, AVIB2
+    cdef double AVIB1, AVIB2, ionModel
     cdef int I, J
     cdef double EN
     object.N_Ionization = 1
-    object.N_Attatchment = 1
+    object.N_Attachment = 1
     object.N_Inelastic = 0
     object.N_Null = 0
-    object.N_ionModel = 0
+    
+    ionModel = 0
 
     for J in range(6):
          object.AngularModel[J] = 0
@@ -71,11 +72,12 @@ cdef void Gas_C2F6(Gas*object):
     NVIB5=22                                                          
     NVIB6=22
     NDISS=27
-    NATT1=26
-    NIOND=48   
+    N_Attachment1=26
+    N_IonizationD=48   
 
     cdef double ElectronMass = 9.10938291e-31
     cdef double AMU = 1.660538921-27
+    cdef double APOP1, APOP2, APOP3, APOP4
 
     object.E = [0.0, 1.0, <float>(14.48), 0.0, 0.0, 0.0]
     object.E[1] = <float>(2.0) * ElectronMass / (<float>(138.0118) * AMU)
@@ -84,10 +86,9 @@ cdef void Gas_C2F6(Gas*object):
 
     cdef double APOP, EFAC
 
-    object.APOP = [1.0,1.0,1.0]
-    object.APOP[0] = [exp(object.EnergyLevels[0]/object.ThermalEnergy)]
-    object.APOP[1] = [exp(object.EnergyLevels[1]/object.ThermalEnergy)]
-    object.APOP[2] = [exp(object.EnergyLevels[2]/object.ThermalEnergy)]
+    APOP1 = exp(object.EnergyLevels[0] / object.ThermalEnergy)
+    APOP2 = exp(object.EnergyLevels[1] / object.ThermalEnergy)
+    APOP3 = exp(object.EnergyLevels[2] / object.ThermalEnergy)
 
     EN = -1*object.EnergyStep/<float>(2.0)
     for I in range(4000):
@@ -119,7 +120,7 @@ cdef void Gas_C2F6(Gas*object):
         if EN >object.EnergyLevels[1]:
             EFAC = sqrt(<float>(1.0) - (object.EnergyLevels[1]/EN))
             object.InelasticCrossSectionPerGas[1][I] = AVIB1 *log((EFAC+<float>(1.0))/(<float>(1.0)-EFAC))/EN
-            object.InelasticCrossSectionPerGas[1][I]  = object.InelasticCrossSectionPerGas[1][I] * 1/(<float>(1.0)+APOP)*1e-16
+            object.InelasticCrossSectionPerGas[1][I]  = object.InelasticCrossSectionPerGas[1][I] * 1/(<float>(1.0)+APOP1)*1e-16
 
         object.InelasticCrossSectionPerGas[2][I] = 0.0
         if EN >object.EnergyLevels[2]:
