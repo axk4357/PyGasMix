@@ -11,7 +11,5 @@ export CFLAGS="-I /usr/local/lib/python3.8/site-packages/numpy/core/include $CFL
 python3 setup_build.py build_ext --inplace
 
 #build the gas file
-python3 PyGasMix/Gases/Setup_npy.py
-mv gases.npy PyGasMix/Gases
-
-
+python3 /Users/King/Documents/GitHub/PyGasMix/PyGasMix/Gases/Setup_npy.py
+mv gases.npy /Users/King/Documents/GitHub/PyGasMix/PyGasMix/Gases
