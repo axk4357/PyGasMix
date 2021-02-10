@@ -115,10 +115,69 @@ cdef void Gas_C2F6(Gas*object):
         object.Q[5][I] = 0.0
 
 	#SUPERELASTIC OF VIBRATION
+	object.InelasticCrossSectionPerGas[0][I] = 0.0
+	object.InelasticCrossSectionPerGas[1][I] = 0.0
+	object.InelasticCrossSectionPerGas[2][I] = 0.0     
+	if EN != 0.0:
+		EFAC = sqrt(1.0 - (object.EnergyLevels[0]/EN))
+            	object.InelasticCrossSectionPerGas[0][I] = <float>(0.0363) *log((EFAC+<float>(1.0))/(EFAC-<float>(1.0)))/EN
+		if(EN+object.EnergyLevels[3])>XVIB2[J]:
+			object.InelasticCrossSectionPerGas[0][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB2, YVIB2, XVIB2)
+	
+	#SUPERELASTIC OF VIBRATION V2
+	EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
+	object.InelasticCrossSectionPerGas[1][I] = 0.0
+	object.InelasticCrossSectionPerGas[0][I] = <float>(0.4230) *log((EFAC+<float>(1.0))/(EFAC-<float>(1.0)))/EN
+	for J in range(2,NVIB3):
+		if(EN+object.EnergyLevels[4])>XVIB3[J]:
+			object.InelasticCrossSectionPerGas[1][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB3, YVIB3, XVIB3)
+
+	#SUPERELASTIC OF VIBRATION V1
+	EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
+	object.InelasticCrossSectionPerGas[1][I] = 0.0
+	object.InelasticCrossSectionPerGas[0][I] = <float>(1.5000) *log((EFAC+<float>(1.0))/(EFAC-<float>(1.0)))/EN
+	for J in range(2,NVIB3):
+		if(EN+object.EnergyLevels[5])>XVIB3[J]:
+			object.InelasticCrossSectionPerGas[2][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB4, YVIB4, XVIB4)
+
+        object.InelasticCrossSectionPerGas[3][I] = 0.0
+	 if EN >object.EnergyLevels[3]:
+             object.InelasticCrossSectionPerGas[3][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB2, YVIB2, XVIB2)
+
+	object.InelasticCrossSectionPerGas[4][I] = 0.0
+        if EN >object.EnergyLevels[4]:
+            object.CALInelasticCrossSectionPerGasVAAnisotropicDetected[4][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB3, YVIB3, XVIB3)
+
+	object.InelasticCrossSectionPerGas[5][I] = 0.0
+        if EN >object.EnergyLevels[5]:
+            object.CALInelasticCrossSectionPerGasVAAnisotropicDetected[4][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(EN, NVIB4, YVIB4, XVIB4)
+
+	object.InelasticCrossSectionPerGas[6][I] = 0.0
+        if EN >object.EnergyLevels[6]:
+            object.InelasticCrossSectionPerGas[6][I] = GasUtil.CALIonizationCrossSectionREG(EN, NVIB5, YVIB5, XVIB5)
+
+	object.InelasticCrossSectionPerGas[7][I] = 0.0
+        if EN >object.EnergyLevels[7]:
+            object.InelasticCrossSectionPerGas[7][I] = GasUtil.CALIonizationCrossSectionREG(EN, NVIB6, YVIB6, XVIB6)
+
+	object.InelasticCrossSectionPerGas[8][I] = 0.0
+        if EN >object.EnergyLevels[8]:
+            object.InelasticCrossSectionPerGas[8][I] = GasUtil.CALIonizationCrossSectionREG(EN, NDISS, YDISS, XDISS)
 
 
+        object.Q[0][I] =0.0
+        for J in range(1,4):
+            object.Q[0][I]+=object.Q[J][I]
+
+        for J in range(9):
+            object.Q[0][I]+=object.InelasticCrossSectionPerGas[J][I]
 
 
+    for J in range(object.N_Inelastic):
+        if object.FinalEnergy <= object.EnergyLevels[J]:
+            object.N_Inelastic = J
+            break
+    return
 
 
-
+			
