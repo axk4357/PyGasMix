@@ -84,7 +84,7 @@ cdef void Gas_C2F6(Gas*object):
 
     object.EOBY[0] = <float > (14.48)
 
-    cdef double APOP1, APOP2, APOP3, APOP4, EN, EFAC, XMOMT
+    cdef double APOP1, APOP2, APOP3, EN, EFAC, XMOMT
 
     APOP1 = exp(object.EnergyLevels[0] / object.ThermalEnergy)
     APOP2 = exp(object.EnergyLevels[1] / object.ThermalEnergy)
@@ -106,8 +106,8 @@ cdef void Gas_C2F6(Gas*object):
                     EN, N_IonizationD, YXTOT, XENT)
 
              if EN < object.E[2]:
-                object.XTOT = GasUtil.CALIonizationCrossSectionREG(
-                    EN, N_IonizationD, YXTOT, <double>(0.0)) 
+                object.Q[2][I] = GasUtil.CALIonizationCrossSectionREG(
+                    EN, N_IonizationD, YXTOT, XION) 
 
              object.Q[3][I] = 0
              object.AttachmentCrossSection[0][I] = 0.0
@@ -156,12 +156,12 @@ cdef void Gas_C2F6(Gas*object):
              object.InelasticCrossSectionPerGas[4][I] = 0.0
              if EN > object.EnergyLevels[4]:
                 object.InelasticCrossSectionPerGas[4][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
-                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, <float> (0.80), <float> (0.5))
+                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, <float> (0.80), <float> (0.0076))
 
              object.InelasticCrossSectionPerGas[5][I] = 0.0
              if EN > object.EnergyLevels[5]:
-                object.CALInelasticCrossSectionPerGasVAAnisotropicDetected[4][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
-                    EN, NVIB4, YVIB4, XVIB4, object.EnergyLevels[5], APOP3, <float> (0.80), <float> (0.5))
+                object.InelasticCrossSectionPerGas[5][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
+                    EN, NVIB4, YVIB4, XVIB4, object.EnergyLevels[5], APOP3, <float> (0.80), <float> (0.076))
 
              object.InelasticCrossSectionPerGas[6][I] = 0.0
              if EN > object.EnergyLevels[6]:

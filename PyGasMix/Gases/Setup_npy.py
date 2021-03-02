@@ -17898,6 +17898,7 @@ gd['gas_C2F6/XATT']=XATTG29
 gd['gas_C2F6/YATT']=YATTG29
 gd['gas_C2F6/XION']=XIONG29
 gd['gas_C2F6/YION']=YIONG29
+gd['gas_C2F6/EnergyLevels'] = EnergyLevelsG29
 
 
 
