@@ -84,7 +84,7 @@ cdef void Gas_C2F6(Gas*object):
 
     object.EOBY[0] = <float > (14.48)
 
-    cdef double APOP1, APOP2, APOP3, EN, EFAC, XMOMT
+    cdef double APOP1, APOP2, APOP3, EN, EFAC, XMOMT, XTOT
 
     APOP1 = exp(object.EnergyLevels[0] / object.ThermalEnergy)
     APOP2 = exp(object.EnergyLevels[1] / object.ThermalEnergy)
@@ -94,16 +94,17 @@ cdef void Gas_C2F6(Gas*object):
     for I in range(4000):
         EN += object.EnergyStep
 
-        object.Q[1][I] = GasUtil.CALIonizationCrossSectionREG(
-            EN, NDATA, YXMOM, XENM)
-
         for J in range(0, NDATA):
-             if EN < XENM[J]:
-                 object.Q[0][I] = GasUtil.CALIonizationCrossSectionREG(
-                     EN, NDATA, YXMOM, XENM)
-             if EN < XENT[J]:
-                object.Q[1][I] = GasUtil.CALIonizationCrossSectionREG(
-                    EN, N_IonizationD, YXTOT, XENT)
+             XMOMT = GasUtil.CALIonizationCrossSectionREG(
+            EN, NDATA, YXMOM, XENM)
+             XTOT = GasUtil.CALIonizationCrossSectionREG(
+            EN, NDATA, YXTOT, XENT)
+
+        for J in range(2,NETOT):
+             if object.AngularModel[J] == 1:
+                 object.Q[2][I] = XTOT
+             if object.AngularModel[J] == 0:
+                object.Q[2][I] = XMOMT
 
              if EN < object.E[2]:
                 object.Q[2][I] = GasUtil.CALIonizationCrossSectionREG(
@@ -128,7 +129,7 @@ cdef void Gas_C2F6(Gas*object):
                  object.InelasticCrossSectionPerGas[0][I] = <float> (0.0363) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
                  if(EN+object.EnergyLevels[3]) > XVIB2[J]:
                     object.InelasticCrossSectionPerGas[0][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB2, YVIB2, XVIB2, APOP1/(1+APOP1), object.EnergyLevels[1], 1,-1*5*EN,0)
+                         EN, NVIB2, YVIB2, XVIB2, APOP1/(<float>(1.0)+APOP1), object.EnergyLevels[1], 1,-1*5*EN,0)
 
             # SUPERELASTIC OF VIBRATION V2
              EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
@@ -137,26 +138,26 @@ cdef void Gas_C2F6(Gas*object):
              for J in range(2, NVIB3):
                  if(EN+object.EnergyLevels[4]) > XVIB3[J]:
                      object.InelasticCrossSectionPerGas[1][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB3, YVIB3, XVIB3, APOP2/(1+APOP2), object.EnergyLevels[2], 1,-1*5*EN,0)
+                         EN, NVIB3, YVIB3, XVIB3, APOP2/(<float>(1.0)+APOP2), object.EnergyLevels[2], 1,-1*5*EN,0)
 
             # SUPERELASTIC OF VIBRATION V1
              EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
              object.InelasticCrossSectionPerGas[1][I] = 0.0
-             object.InelasticCrossSectionPerGas[0][I] = <float > (1.5000) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
+             object.InelasticCrossSectionPerGas[0][I] = <float>(1.5000) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
              for J in range(2, NVIB3):
                  if(EN+object.EnergyLevels[5]) > XVIB3[J]:
                      object.InelasticCrossSectionPerGas[2][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB4, YVIB4, XVIB4,APOP3/(1+APOP3), object.EnergyLevels[5], 1,-1*5*EN,0)
+                         EN, NVIB4, YVIB4, XVIB4,APOP3/(<float>(1.0)+APOP3), object.EnergyLevels[5], 1,-1*5*EN,0)
 
              object.InelasticCrossSectionPerGas[3][I] = 0.0
              if EN > object.EnergyLevels[3]:
                 object.InelasticCrossSectionPerGas[3][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB2, YVIB2, XVIB2, APOP1/(1+APOP1), object.EnergyLevels[6], 1,-1*5*EN,0)
+                         EN, NVIB2, YVIB2, XVIB2, APOP1/(<float>(1.0)+APOP1), object.EnergyLevels[6], 1,-1*5*EN,0)
 
              object.InelasticCrossSectionPerGas[4][I] = 0.0
              if EN > object.EnergyLevels[4]:
                 object.InelasticCrossSectionPerGas[4][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
-                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, <float> (0.80), <float> (0.0076))
+                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, <float> (0.80), <float> (0.076))
 
              object.InelasticCrossSectionPerGas[5][I] = 0.0
              if EN > object.EnergyLevels[5]:

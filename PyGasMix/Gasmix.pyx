@@ -16,8 +16,8 @@ from Gases.NITROGEN cimport Gas_nitrogen
 from Gases.HYDROGEN cimport Gas_hydrogen
 from Gases.DEUTERIUM cimport Gas_deuterium
 from Gases.DME cimport Gas_DME
-from Gases.XENONMERT cimport Gas_xenonmert
 from Gases.C2F6 cimport Gas_C2F6
+from Gases.XENONMERT cimport Gas_xenonmert
 from libc.string cimport memset
 from PyGasMix.Gas cimport Gas
 
