@@ -48,21 +48,19 @@ cdef void Gas_C2F6(Gas*object):
     XION = gd['gas_C2F6/XION']
     YION = gd['gas_C2F6/YION']
     object.EnergyLevels = gd['gas_C2F6/EnergyLevels']
+    print(object.EnergyLevels)
 
 # ———————————————————————————————————————
-    cdef double AVIB1, AVIB2, ionModel
+    cdef double AVIB1, AVIB2, RAT
     cdef int I, J
     object.N_Ionization = 1
     object.N_Attachment = 1
     object.N_Inelastic = 9
     object.N_Null = 0
-
-    ionModel = 0
+    RAT = 1.0
 
     for J in range(6):
-         object.AngularModel[J] = 0
-
-    for J in range(object.N_Inelastic):
+         object.AngularModel[J] = object.WhichAngularModel
          object.KIN[J] = 0
 
     NDATA = 56
@@ -84,11 +82,16 @@ cdef void Gas_C2F6(Gas*object):
 
     object.EOBY[0] = <float > (14.48)
 
-    cdef double APOP1, APOP2, APOP3, EN, EFAC, XMOMT, XTOT
+    cdef double APOP1, APOP2, APOP3, DEGV4, DEGV3, DEGV2, DEGV1, EN, EFAC, XMOMT, XTOT
 
-    APOP1 = exp(object.EnergyLevels[0] / object.ThermalEnergy)
-    APOP2 = exp(object.EnergyLevels[1] / object.ThermalEnergy)
-    APOP3 = exp(object.EnergyLevels[2] / object.ThermalEnergy)
+    DEGV4 = 3.0
+    DEGV2 = 2.0
+    DEGV1 = 1.0
+    DEGV3 = 3.0
+
+    APOP1 = DEGV1 * exp(object.EnergyLevels[0] / object.ThermalEnergy)
+    APOP2 = DEGV2 * exp(object.EnergyLevels[1] / object.ThermalEnergy)
+    APOP3 = DEGV3 * exp(object.EnergyLevels[2] / object.ThermalEnergy)
 
     EN = -1*object.EnergyStep/<float > (2.0)
     for I in range(4000):
@@ -107,14 +110,12 @@ cdef void Gas_C2F6(Gas*object):
                 object.Q[2][I] = XMOMT
 
              if EN < object.E[2]:
-                object.Q[2][I] = GasUtil.CALIonizationCrossSectionREG(
-                    EN, N_IonizationD, YXTOT, XION) 
+                object.Q[2][I] = GasUtil.CALIonizationCrossSectionREG(EN, N_IonizationD, YXTOT, XION) 
 
              object.Q[3][I] = 0
              object.AttachmentCrossSection[0][I] = 0.0
              if EN > XATT[0]:
-                object.Q[3][I] = GasUtil.CALIonizationCrossSection(
-                    EN, N_Attachment1, YATT, XATT)*1e-5
+                object.Q[3][I] = GasUtil.CALIonizationCrossSection(EN, N_Attachment1, YATT, XATT)*1e-5
              object.AttachmentCrossSection[0][I] = object.Q[3][I]
 
              object.Q[4][I] = 0.0
@@ -127,9 +128,9 @@ cdef void Gas_C2F6(Gas*object):
              if EN != 0.0:
                  EFAC = sqrt(1.0 - (object.EnergyLevels[0]/EN))
                  object.InelasticCrossSectionPerGas[0][I] = <float> (0.0363) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
-                 if(EN+object.EnergyLevels[3]) > XVIB2[J]:
-                    object.InelasticCrossSectionPerGas[0][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB2, YVIB2, XVIB2, APOP1/(<float>(1.0)+APOP1), object.EnergyLevels[1], 1,-1*5*EN,0)
+             if(EN+object.EnergyLevels[3]) > XVIB2[J]:
+                 object.InelasticCrossSectionPerGas[0][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
+                         EN, NVIB2, YVIB2, XVIB2, APOP1, object.EnergyLevels[1], DEGV4,object.EnergyLevels[0],<float> (0.076))
 
             # SUPERELASTIC OF VIBRATION V2
              EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
@@ -138,31 +139,31 @@ cdef void Gas_C2F6(Gas*object):
              for J in range(2, NVIB3):
                  if(EN+object.EnergyLevels[4]) > XVIB3[J]:
                      object.InelasticCrossSectionPerGas[1][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB3, YVIB3, XVIB3, APOP2/(<float>(1.0)+APOP2), object.EnergyLevels[2], 1,-1*5*EN,0)
+                         EN, NVIB3, YVIB3, XVIB3, APOP2/(<float>(1.0)+APOP2), object.EnergyLevels[2], DEGV3, object.EnergyLevels[0],0.0)
 
             # SUPERELASTIC OF VIBRATION V1
              EFAC = sqrt(1.0 - (object.EnergyLevels[1]/EN))
-             object.InelasticCrossSectionPerGas[1][I] = 0.0
-             object.InelasticCrossSectionPerGas[0][I] = <float>(1.5000) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
+             object.InelasticCrossSectionPerGas[0][I] = 0.0
+             object.InelasticCrossSectionPerGas[1][I] = <float>(1.5000) * log((EFAC+<float > (1.0))/(EFAC-<float > (1.0)))/EN
              for J in range(2, NVIB3):
                  if(EN+object.EnergyLevels[5]) > XVIB3[J]:
                      object.InelasticCrossSectionPerGas[2][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB4, YVIB4, XVIB4,APOP3/(<float>(1.0)+APOP3), object.EnergyLevels[5], 1,-1*5*EN,0)
+                         EN, NVIB4, YVIB4, XVIB4,APOP3, object.EnergyLevels[5], DEGV3, object.EnergyLevels[0],<float> (0.076))
 
              object.InelasticCrossSectionPerGas[3][I] = 0.0
              if EN > object.EnergyLevels[3]:
                 object.InelasticCrossSectionPerGas[3][I] = GasUtil.CALInelasticCrossSectionPerGasVISO(
-                         EN, NVIB2, YVIB2, XVIB2, APOP1/(<float>(1.0)+APOP1), object.EnergyLevels[6], 1,-1*5*EN,0)
+                         EN, NVIB2, YVIB2, XVIB2, APOP1, object.EnergyLevels[6], DEGV1, object.EnergyLevels[0], <float> (0.076))
 
              object.InelasticCrossSectionPerGas[4][I] = 0.0
              if EN > object.EnergyLevels[4]:
                 object.InelasticCrossSectionPerGas[4][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
-                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, <float> (0.80), <float> (0.076))
+                    EN, NVIB3, YVIB3, XVIB3, object.EnergyLevels[4], APOP2, RAT, <float> (0.076))
 
              object.InelasticCrossSectionPerGas[5][I] = 0.0
              if EN > object.EnergyLevels[5]:
                 object.InelasticCrossSectionPerGas[5][I] = GasUtil.CALInelasticCrossSectionPerGasVAAnisotropicDetected(
-                    EN, NVIB4, YVIB4, XVIB4, object.EnergyLevels[5], APOP3, <float> (0.80), <float> (0.076))
+                    EN, NVIB4, YVIB4, XVIB4, object.EnergyLevels[5], APOP3, RAT, <float> (0.076))
 
              object.InelasticCrossSectionPerGas[6][I] = 0.0
              if EN > object.EnergyLevels[6]:
